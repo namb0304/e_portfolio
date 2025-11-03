@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}学生一覧 - 教員{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">学生一覧</h1>
+
+{% if unread_count > 0 %}
+<div class="alert alert-info">
+    <span class="badge bg-danger">{{ unread_count }}</span> 件の未読メッセージがあります
+    <a href="{{ url_for('teacher_chat') }}" class="alert-link">メッセージを見る</a>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">登録学生</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>学生番号</th>
+                        <th>氏名</th>
+                        <th>登録日</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.id }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <a href="{{ url_for('teacher_student_detail', student_id=student.id) }}" class="btn btn-sm btn-primary">
+                                詳細を見る
+                            </a>
+                            <a href="{{ url_for('teacher_chat', student_id=student.id) }}" class="btn btn-sm btn-success">
+                                メッセージ
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

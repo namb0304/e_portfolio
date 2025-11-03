@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}ダッシュボード - 学生{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">ダッシュボード</h1>
+
+<div class="row">
+    <!-- 出席記録エリア -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">出席記録</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('student_attendance') }}" class="mb-3">
+                    <div class="mb-2">
+                        <label for="date" class="form-label">日付</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="status" class="form-label">状態</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="出席">出席</option>
+                            <option value="欠席">欠席</option>
+                            <option value="遅刻">遅刻</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="note" class="form-label">メモ</label>
+                        <textarea class="form-control" id="note" name="note" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">記録</button>
+                </form>
+                
+                <h6>最近の記録</h6>
+                <div class="list-group">
+                    {% for record in attendance %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ record.date }}</span>
+                            <span class="badge bg-{{ 'success' if record.status == '出席' else 'danger' }}">
+                                {{ record.status }}
+                            </span>
+                        </div>
+                        {% if record.note %}
+                        <small class="text-muted">{{ record.note }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- チャンネル投稿エリア -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">授業チャンネル投稿</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('student_channel_post') }}">
+                    <div class="mb-2">
+                        <label for="channel_name" class="form-label">授業名</label>
+                        <input type="text" class="form-control" id="channel_name" name="channel_name" placeholder="例: Web開発基礎" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="content" class="form-label">内容</label>
+                        <textarea class="form-control" id="content" name="content" rows="3" placeholder="今日学んだこと、気づきなど" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm">投稿</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- プロジェクト配属 -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">未来創造PJ配属</h5>
+            </div>
+            <div class="card-body">
+                {% if projects %}
+                    {% for project in projects %}
+                    <div class="mb-3 p-3 border rounded">
+                        <h6>{{ project.project_name }}</h6>
+                        {% if project.role %}
+                        <p class="mb-1"><strong>役割:</strong> {{ project.role }}</p>
+                        {% endif %}
+                        {% if project.description %}
+                        <p class="mb-1">{{ project.description }}</p>
+                        {% endif %}
+                        {% if project.start_date %}
+                        <small class="text-muted">
+                            期間: {{ project.start_date }} 〜 {{ project.end_date or '現在' }}
+                        </small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">プロジェクトの配属はありません</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- メッセージ -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">メッセージ</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if unread_count > 0 %}
+                <p class="mb-3">
+                    <span class="badge bg-danger fs-5">{{ unread_count }}</span> 件の未読メッセージ
+                </p>
+                {% else %}
+                <p class="text-muted mb-3">未読メッセージはありません</p>
+                {% endif %}
+                <a href="{{ url_for('student_chat') }}" class="btn btn-warning">メッセージを見る</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.name }} - 学生詳細{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ student.name }}さんの情報</h1>
+    <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-secondary">学生一覧に戻る</a>
+</div>
+
+<div class="row">
+    <!-- 基本情報 -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">基本情報</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>学生番号:</strong> {{ student.id }}</p>
+                <p><strong>氏名:</strong> {{ student.name }}</p>
+                <p><strong>ユーザー名:</strong> {{ student.username }}</p>
+                <p><strong>登録日:</strong> {{ student.created_at.strftime('%Y-%m-%d') }}</p>
+                <a href="{{ url_for('teacher_chat', student_id=student.id) }}" class="btn btn-success w-100">
+                    メッセージを送る
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- プロジェクト配属 -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">未来創造PJ配属</h5>
+            </div>
+            <div class="card-body">
+                {% if projects %}
+                    {% for project in projects %}
+                    <div class="mb-3 p-3 border rounded">
+                        <h6>{{ project.project_name }}</h6>
+                        {% if project.role %}
+                        <p class="mb-1"><strong>役割:</strong> {{ project.role }}</p>
+                        {% endif %}
+                        {% if project.description %}
+                        <p class="mb-1">{{ project.description }}</p>
+                        {% endif %}
+                        {% if project.start_date %}
+                        <small class="text-muted">
+                            期間: {{ project.start_date }} 〜 {{ project.end_date or '現在' }}
+                        </small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">プロジェクトの配属はありません</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 出席記録 -->
+<div class="card mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">出席記録</h5>
+    </div>
+    <div class="card-body">
+        {% if attendance %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>日付</th>
+                        <th>状態</th>
+                        <th>メモ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance %}
+                    <tr>
+                        <td>{{ record.date }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if record.status == '出席' else 'danger' }}">
+                                {{ record.status }}
+                            </span>
+                        </td>
+                        <td>{{ record.note or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">出席記録がありません</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 授業チャンネル投稿 -->
+<div class="card mb-4">
+    <div class="card-header bg-warning">
+        <h5 class="mb-0">授業チャンネル投稿</h5>
+    </div>
+    <div class="card-body">
+        {% if posts %}
+            {% for post in posts %}
+            <div class="mb-3 p-3 border rounded">
+                <div class="d-flex justify-content-between mb-2">
+                    <strong>{{ post.channel_name }}</strong>
+                    <small class="text-muted">{{ post.posted_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                <p class="mb-0">{{ post.content }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+        <p class="text-muted">投稿がありません</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ポートフォリオ -->
+<div class="card mb-4">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">ポートフォリオ</h5>
+    </div>
+    <div class="card-body">
+        {% if portfolios %}
+        <div class="row">
+            {% for portfolio in portfolios %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ portfolio.title }}</h6>
+                        {% if portfolio.description %}
+                        <p class="card-text">{{ portfolio.description }}</p>
+                        {% endif %}
+                        
+                        {% if portfolio.portfolio_type == 'file' %}
+                        <a href="{{ url_for('uploaded_file', filename=portfolio.file_path) }}" class="btn btn-sm btn-primary" target="_blank">
+                            ファイルを見る
+                        </a>
+                        {% elif portfolio.portfolio_type == 'link' %}
+                        <a href="{{ portfolio.external_url }}" class="btn btn-sm btn-success" target="_blank">
+                            リンクを開く
+                        </a>
+                        {% endif %}
+                        
+                        <small class="text-muted d-block mt-2">
+                            登録日: {{ portfolio.created_at.strftime('%Y-%m-%d') }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">ポートフォリオがありません</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

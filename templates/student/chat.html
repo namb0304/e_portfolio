@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}メッセージ - 学生{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">メッセージ</h1>
+
+<div class="row">
+    <!-- 教員リスト -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">教員一覧</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for teacher in teachers %}
+                <a href="{{ url_for('student_chat', teacher_id=teacher.id) }}" 
+                   class="list-group-item list-group-item-action {{ 'active' if selected_teacher and selected_teacher.id == teacher.id else '' }}">
+                    {{ teacher.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- チャットエリア -->
+    <div class="col-md-8">
+        {% if selected_teacher %}
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ selected_teacher.name }}とのメッセージ</h5>
+            </div>
+            <div class="card-body" style="height: 400px; overflow-y: auto;" id="chat-messages">
+                {% for message in messages %}
+                <div class="mb-3 {{ 'text-end' if message.sender_id == current_user.id else '' }}">
+                    <div class="d-inline-block p-2 rounded {{ 'bg-primary text-white' if message.sender_id == current_user.id else 'bg-light' }}" style="max-width: 70%;">
+                        <div>{{ message.content }}</div>
+                        <small class="text-muted d-block mt-1">
+                            {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="card-footer">
+                <form method="POST" action="{{ url_for('student_send_message') }}">
+                    <input type="hidden" name="teacher_id" value="{{ selected_teacher.id }}">
+                    <div class="input-group">
+                        <textarea class="form-control" name="content" rows="2" placeholder="メッセージを入力..." required></textarea>
+                        <button class="btn btn-primary" type="submit">送信</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center text-muted">
+                <p>左側から教員を選択してください</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// チャットエリアを最下部にスクロール
+const chatMessages = document.getElementById('chat-messages');
+if (chatMessages) {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+</script>
+{% endblock %}
