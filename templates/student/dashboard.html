@@ -86,7 +86,7 @@
             <div class="card-body">
                 {% if projects %}
                     {% for project in projects %}
-                    <div class="mb-3 p-3 border rounded">
+                    <div class="mb-3 p-3 border rounded position-relative">
                         <h6>{{ project.project_name }}</h6>
                         {% if project.role %}
                         <p class="mb-1"><strong>役割:</strong> {{ project.role }}</p>
@@ -94,15 +94,23 @@
                         {% if project.description %}
                         <p class="mb-1">{{ project.description }}</p>
                         {% endif %}
-                        {% if project.start_date %}
-                        <small class="text-muted">
-                            期間: {{ project.start_date }} 〜 {{ project.end_date or '現在' }}
-                        </small>
-                        {% endif %}
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editProjectModal">
+                                編集
+                            </button>
+                            <form method="POST" action="{{ url_for('delete_project', project_id=project.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('本当に削除しますか？')">
+                                    削除
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <p class="text-muted">プロジェクトの配属はありません</p>
+                    <p class="text-muted mb-3">ゼミの配属はありません</p>
+                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                        ゼミを登録
+                    </button>
                 {% endif %}
             </div>
         </div>
@@ -127,4 +135,102 @@
         </div>
     </div>
 </div>
+
+<!-- ゼミ登録モーダル -->
+<div class="modal fade" id="addProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ゼミ登録</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('student_project') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="project_name" class="form-label">ゼミ名</label>
+                        <select class="form-select" id="project_name" name="project_name" required>
+                            <option value="">選択してください</option>
+                            <option value="Thatsaneeゼミ（Virach・Thatsanee・佐々木合同）">Thatsaneeゼミ（Virach・Thatsanee・佐々木合同）</option>
+                            <option value="Virachゼミ（Virach・Thatsanee・佐々木合同）">Virachゼミ（Virach・Thatsanee・佐々木合同）</option>
+                            <option value="石橋ゼミ">石橋ゼミ</option>
+                            <option value="岩田ゼミ">岩田ゼミ</option>
+                            <option value="浦木ゼミ（清木・浦木・林合同）">浦木ゼミ（清木・浦木・林合同）</option>
+                            <option value="清木ゼミ（清木・浦木・林合同）">清木ゼミ（清木・浦木・林合同）</option>
+                            <option value="佐々木ゼミ（Virach・Thatsanee・佐々木合同）">佐々木ゼミ（Virach・Thatsanee・佐々木合同）</option>
+                            <option value="武藤ゼミ">武藤ゼミ</option>
+                            <option value="中村ゼミ">中村ゼミ</option>
+                            <option value="長谷川ゼミ">長谷川ゼミ</option>
+                            <option value="林ゼミ（清木・浦木・林合同）">林ゼミ（清木・浦木・林合同）</option>
+                            <option value="福原ゼミ">福原ゼミ</option>
+                            <option value="渡邉ゼミ">渡邉ゼミ</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">役割（任意）</label>
+                        <input type="text" class="form-control" id="role" name="role" placeholder="例: リーダー、開発担当など">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">活動内容（任意）</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="研究内容や活動について"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">登録</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ゼミ編集モーダル -->
+<div class="modal fade" id="editProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ゼミ編集</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('student_project') }}">
+                <div class="modal-body">
+                    {% if projects %}
+                    {% set project = projects[0] %}
+                    <div class="mb-3">
+                        <label for="edit_project_name" class="form-label">ゼミ名</label>
+                        <select class="form-select" id="edit_project_name" name="project_name" required>
+                            <option value="">選択してください</option>
+                            <option value="Thatsaneeゼミ（Virach・Thatsanee・佐々木合同）" {% if project.project_name == 'Thatsaneeゼミ（Virach・Thatsanee・佐々木合同）' %}selected{% endif %}>Thatsaneeゼミ（Virach・Thatsanee・佐々木合同）</option>
+                            <option value="Virachゼミ（Virach・Thatsanee・佐々木合同）" {% if project.project_name == 'Virachゼミ（Virach・Thatsanee・佐々木合同）' %}selected{% endif %}>Virachゼミ（Virach・Thatsanee・佐々木合同）</option>
+                            <option value="石橋ゼミ" {% if project.project_name == '石橋ゼミ' %}selected{% endif %}>石橋ゼミ</option>
+                            <option value="岩田ゼミ" {% if project.project_name == '岩田ゼミ' %}selected{% endif %}>岩田ゼミ</option>
+                            <option value="浦木ゼミ（清木・浦木・林合同）" {% if project.project_name == '浦木ゼミ（清木・浦木・林合同）' %}selected{% endif %}>浦木ゼミ（清木・浦木・林合同）</option>
+                            <option value="清木ゼミ（清木・浦木・林合同）" {% if project.project_name == '清木ゼミ（清木・浦木・林合同）' %}selected{% endif %}>清木ゼミ（清木・浦木・林合同）</option>
+                            <option value="佐々木ゼミ（Virach・Thatsanee・佐々木合同）" {% if project.project_name == '佐々木ゼミ（Virach・Thatsanee・佐々木合同）' %}selected{% endif %}>佐々木ゼミ（Virach・Thatsanee・佐々木合同）</option>
+                            <option value="武藤ゼミ" {% if project.project_name == '武藤ゼミ' %}selected{% endif %}>武藤ゼミ</option>
+                            <option value="中村ゼミ" {% if project.project_name == '中村ゼミ' %}selected{% endif %}>中村ゼミ</option>
+                            <option value="長谷川ゼミ" {% if project.project_name == '長谷川ゼミ' %}selected{% endif %}>長谷川ゼミ</option>
+                            <option value="林ゼミ（清木・浦木・林合同）" {% if project.project_name == '林ゼミ（清木・浦木・林合同）' %}selected{% endif %}>林ゼミ（清木・浦木・林合同）</option>
+                            <option value="福原ゼミ" {% if project.project_name == '福原ゼミ' %}selected{% endif %}>福原ゼミ</option>
+                            <option value="渡邉ゼミ" {% if project.project_name == '渡邉ゼミ' %}selected{% endif %}>渡邉ゼミ</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_role" class="form-label">役割（任意）</label>
+                        <input type="text" class="form-control" id="edit_role" name="role" value="{{ project.role or '' }}" placeholder="例: リーダー、開発担当など">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label">活動内容（任意）</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="3" placeholder="研究内容や活動について">{{ project.description or '' }}</textarea>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">更新</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
